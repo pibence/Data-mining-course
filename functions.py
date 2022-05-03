@@ -4,7 +4,6 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from IPython import display
 import re
 import os
 
@@ -66,8 +65,6 @@ def random_forest_estimator(X_train, y_train, X_test, y_test, max_depth):
     ax.legend(['Training Accuracy','Test Accuracy'])
     ax.set_title("Accuracy of random forest model", size = 14)
 
-    display.display(fig)
-
 
 def gradient_boosting_estimator(X_train, y_train, X_test, y_test, learning_rate, max_depth, est_range):
     '''
@@ -97,8 +94,6 @@ def gradient_boosting_estimator(X_train, y_train, X_test, y_test, learning_rate,
     ax.set_xlabel('Estimators')
     ax.set_ylabel('Accuracy')
     ax.set_title('Gradient boosting model accuracy on \nestimators', size = 14)
-
-    display.display(fig)
 
 
 def check_accuracy(y_test, y_pred):
