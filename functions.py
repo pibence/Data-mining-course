@@ -1,7 +1,34 @@
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+from IPython import display
+import re
+import os
+
+
+def import_data(folder) -> dict:
+    '''
+    The function returns the joined dataframes in a format of a dictionary for
+    each decade from the given folder.
+    '''
+
+    # read filenames from folder containing data
+    files = os.listdir(folder)
+
+    r = re.compile("dataset*")
+    filtered_files = list(filter(r.match, files))
+
+    # read the csv-s to a dictionary
+    df_dict = {}
+    for file in filtered_files:
+        df_dict[file.split(".")[0]] = (pd.read_csv(f"{folder}/{file}"))
+    
+    return(df_dict)
+
+
 
 def random_forest_estimator(X_train, y_train, X_test, y_test, max_depth):
     '''
@@ -39,11 +66,48 @@ def random_forest_estimator(X_train, y_train, X_test, y_test, max_depth):
     ax.legend(['Training Accuracy','Test Accuracy'])
     ax.set_title("Accuracy of random forest model", size = 14)
 
+    display.display(fig)
 
-    def gradient_boosting_estimator(X_train, y_train, X_test, y_test, learnig_rate, max_depth, est_rangethe):
-        '''
-        The function runs multiple gradient boosting models with different
-        estimator numbers and plots the accuracy of the train and test datasets
-        in order to define the optimal number of estimators.
-        '''
 
+def gradient_boosting_estimator(X_train, y_train, X_test, y_test, learning_rate, max_depth, est_range):
+    '''
+    The function runs multiple gradient boosting models with different
+    estimator numbers and plots the accuracy of the train and test datasets
+    in order to define the optimal number of estimators.
+    '''
+
+    acc = []
+
+    for est in tqdm(est_range):
+        # creating gradient boosting model
+        grad = GradientBoostingClassifier(n_estimators = est, learning_rate = learning_rate , max_depth = max_depth, random_state = 0)
+        # fitting model
+        grad.fit(X_train, y_train)
+        # creating prediction
+        y_pred = grad.predict(X_test)
+        # evaluating accuracy
+        acc.append(accuracy_score(y_test, y_pred))
+
+
+    # plotting accuracy scores
+    fig, ax = plt.subplots(figsize=(8,5))
+
+    ax.plot(est_range, acc)
+    # setting design
+    ax.set_xlabel('Estimators')
+    ax.set_ylabel('Accuracy')
+    ax.set_title('Gradient boosting model accuracy on \nestimators', size = 14)
+
+    display.display(fig)
+
+
+def check_accuracy(y_test, y_pred):
+    '''
+    This function prints the confusion matrix and the accuracy score of
+    the two given arrays.
+    '''
+
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    acc_score = accuracy_score(y_test, y_pred)
+
+    print(f"Confusion matrix:\n{conf_matrix}\n\nThe accuracy score is {	'{:.4f}'.format(acc_score)}")
